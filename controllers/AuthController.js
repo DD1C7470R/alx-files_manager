@@ -3,13 +3,11 @@ import { v4 as uuidv4 } from 'uuid';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
-
 function hashPassword(password) {
   const sha1 = crypto.createHash('sha1');
   sha1.update(password);
   return sha1.digest('hex');
 }
-
 
 class AuthController {
   static
@@ -37,7 +35,7 @@ class AuthController {
       const hashedpassword = hashPassword(password);
 
       if (hashedpassword !== user[0].password) {
-        res.statusCode = 401;
+        res.statusCode = 400;
         return res.json({ error: 'password is incorrect' });
       }
 
@@ -63,12 +61,12 @@ class AuthController {
         res.statusCode = 401;
         return res.json({ error: 'Unauthorized' });
       }
-	  await redisClient.del(`auth_${token}`);
+      await redisClient.del(`auth_${token}`);
       res.statusCode = 204;
-      res.json();
+      return res.json();
     } catch (error) {
       res.statusCode = 500;
-      res.json({ error: 'An error occured' });
+      return res.json({ error: 'An error occured' });
     }
   }
 }
