@@ -3,6 +3,14 @@ import { v4 as uuidv4 } from 'uuid';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
+
+function hashPassword(password) {
+  const sha1 = crypto.createHash('sha1');
+  sha1.update(password);
+  return sha1.digest('hex');
+}
+
+
 class AuthController {
   static
   async getConnect(req, res) {
@@ -38,10 +46,10 @@ class AuthController {
       redisClient.set(`auth_${token}`, user[0]._id, expireTime);
 
       res.statusCode = 200;
-      res.json({ token });
+      return res.json({ token });
     } catch (error) {
       res.statusCode = 500;
-      res.json({ message: 'An error occured' });
+      return res.json({ message: 'An error occured' });
     }
   }
 
@@ -63,11 +71,5 @@ class AuthController {
       res.json({ error: 'An error occured' });
     }
   }
-}
-
-function hashPassword(password) {
-  const sha1 = crypto.createHash('sha1');
-  sha1.update(password);
-  return sha1.digest('hex');
 }
 export default AuthController;
