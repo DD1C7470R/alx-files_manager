@@ -57,7 +57,7 @@ class FilesController {
           name,
           type,
           isPublic: isPublic || false,
-          parentId: '0',
+          parentId: parentId || '0',
         });
       }
 
