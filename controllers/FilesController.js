@@ -9,12 +9,13 @@ class FilesController {
   static
   async postUpload(req, res) {
     let file = {};
+    const acceptedTypes = ['file', 'folder', 'image'];
     const user = req.currentUser;
     const {
       name, type, data, parentId, isPublic,
     } = req.body;
 
-    if (!name || !type) {
+    if (!name || !type || !acceptedTypes.include(type)) {
       res.statusCode = 400;
       return res.json({ error: `Missing ${name ? 'type' : 'name'}` });
     }
