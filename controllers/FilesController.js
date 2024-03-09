@@ -1,9 +1,10 @@
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { writeFile } from 'fs';
-import { promisify } from 'util';
+import { promises } from 'fs';
 import { ObjectID } from 'mongodb';
 import dbClient from '../utils/db';
+
+const { mkdir, writeFile } = promises;
 
 class FilesController {
   static
@@ -69,9 +70,9 @@ class FilesController {
       const filePath = path.join(folderPath, localPath);
 
       if (data) {
+        await mkdir(folderPath, { recursive: true });
         const fileData = Buffer.from(data, 'base64').toString();
-        const fileWriter = promisify(writeFile);
-        await fileWriter(filePath, fileData);
+        await writeFile(filePath, fileData);
       }
 
       const result = await fileCollections.insertOne({ ...savedFile, localPath: filePath });
