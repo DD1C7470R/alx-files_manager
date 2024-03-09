@@ -9,13 +9,10 @@ class RedisClient {
     this.client.on('error', (err) => {
       console.error('Redis connection error:', err);
     });
-    this.client.on('connect', () => {
-      this.isConnected = true;
-    });
   }
 
   isAlive() {
-    return this.client.connected === this.isConnected;
+    return this.client.connected;
   }
 
   async get(value) {
