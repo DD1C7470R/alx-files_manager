@@ -19,8 +19,8 @@ class AuthController {
     const [email, password] = credentials;
 
     if (!email || !password) {
-      res.statusCode = 400;
-      return res.json({ error: `Missing ${email ? 'password' : 'email'}` });
+      res.statusCode = 401;
+      return res.json({ error: 'Unauthorized' });
     }
 
     try {
