@@ -15,7 +15,7 @@ class FilesController {
       name, type, data, parentId, isPublic,
     } = req.body;
 
-    if (!name || !type || !acceptedTypes.include(type)) {
+    if (!name || !type || !acceptedTypes.includes(type)) {
       res.statusCode = 400;
       return res.json({ error: `Missing ${name ? 'type' : 'name'}` });
     }
