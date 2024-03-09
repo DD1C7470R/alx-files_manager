@@ -2,6 +2,12 @@ import crypto from 'crypto';
 
 import dbClient from '../utils/db';
 
+function hashPassword(password) {
+  const sha1 = crypto.createHash('sha1');
+  sha1.update(password);
+  return sha1.digest('hex');
+}
+
 class UsersController {
   static
   async postNew(req, res) {
@@ -29,13 +35,13 @@ class UsersController {
       });
 
       res.statusCode = 200;
-      res.json({
+      return res.json({
         id: savedUser.insertedId,
         email,
       });
     } catch (error) {
       res.statusCode = 500;
-      res.json({ message: 'An error occured' });
+      return res.json({ message: 'An error occured' });
     }
   }
 
@@ -55,9 +61,4 @@ class UsersController {
   }
 }
 
-function hashPassword(password) {
-  const sha1 = crypto.createHash('sha1');
-  sha1.update(password);
-  return sha1.digest('hex');
-}
 export default UsersController;
