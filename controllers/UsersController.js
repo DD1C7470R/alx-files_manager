@@ -32,7 +32,6 @@ class UsersController {
       res.json({
         id: savedUser.insertedId,
         email,
-        password: hashedpassword,
       });
     } catch (error) {
       res.statusCode = 500;

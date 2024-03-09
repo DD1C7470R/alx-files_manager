@@ -8,7 +8,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use('/', indexRouter);
 
-const port = process.PORT || 6000;
+const port = process.PORT || 5000;
 
 app.listen(port, () => {
   console.log('server running.');
