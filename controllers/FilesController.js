@@ -76,14 +76,14 @@ class FilesController {
       const result = await fileCollections.insertOne({ ...savedFile, localPath: filePath });
 
       res.statusCode = 201;
-      res.json({
+      return res.json({
         id: result.insertedId,
         ...savedFile,
         localPath: filePath,
       });
     } catch (error) {
       res.statusCode = 500;
-      res.json({ error: 'An error occured' });
+      return res.json({ error: 'An error occured' });
     }
   }
 
@@ -94,16 +94,18 @@ class FilesController {
 
     try {
       const fileCollections = dbClient.db.collection('files');
-      const results = await fileCollections.find({ _id: new ObjectID(id), userId: user._id }).toArray();
+      const results = await fileCollections.find({
+        _id: new ObjectID(id), userId: user._id,
+      }).toArray();
       if (!results.length) {
         res.statusCode = 404;
         return res.json({ error: 'Not found' });
       }
       res.statusCode = 200;
-      res.json(results[0]);
+      return res.json(results[0]);
     } catch (error) {
       res.statusCode = 500;
-      res.json({ error: 'An error occured.' });
+      return res.json({ error: 'An error occured.' });
     }
   }
 
@@ -143,7 +145,9 @@ class FilesController {
 
     try {
       const fileCollection = dbClient.db.collection('files');
-      const result = await fileCollection.find({ _id: new ObjectID(id), userId: user.id }).toArray();
+      const result = await fileCollection.find({
+        _id: new ObjectID(id), userId: user.id,
+      }).toArray();
       if (!result.length) {
         res.statusCode = 404;
         return res.json({ error: 'Not found' });
@@ -151,10 +155,10 @@ class FilesController {
       const row = result[0];
       row.isPublic = true;
       res.statusCode = 200;
-      res.json(row);
+      return res.json(row);
     } catch (error) {
       res.statusCode = 500;
-      res.json({ error: 'An error occured.' });
+      return res.json({ error: 'An error occured.' });
     }
   }
 
@@ -165,7 +169,9 @@ class FilesController {
 
     try {
       const fileCollection = dbClient.db.collection('files');
-      const result = await fileCollection.find({ _id: new ObjectID(id), userId: user.id }).toArray();
+      const result = await fileCollection.find({
+        _id: new ObjectID(id), userId: user.id,
+      }).toArray();
       if (!result.length) {
         res.statusCode = 404;
         return res.json({ error: 'Not found' });
@@ -174,10 +180,10 @@ class FilesController {
       const row = result[0];
       row.isPublic = false;
       res.statusCode = 200;
-      res.json(row);
+      return res.json(row);
     } catch (error) {
       res.statusCode = 500;
-      res.json({ error: 'An error occured.' });
+      return res.json({ error: 'An error occured.' });
     }
   }
 }
