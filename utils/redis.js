@@ -15,7 +15,7 @@ class RedisClient {
   }
 
   isAlive() {
-    return this.client.connected;
+    return this.client.connected === this.isConnected;
   }
 
   async get(value) {
@@ -36,4 +36,3 @@ class RedisClient {
 }
 const redisClient = new RedisClient();
 export default redisClient;
-
