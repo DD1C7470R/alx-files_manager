@@ -41,11 +41,11 @@ class FilesController {
       }
 
       const savedFile = {
-        userId: user._id,
+        userId: new ObjectID(user._id),
         name,
         type,
         isPublic: isPublic || false,
-        parentId: parentId || '0',
+        parentId: new ObjectID(parentId) || '0',
         ...file,
       };
 
@@ -80,7 +80,11 @@ class FilesController {
       res.statusCode = 201;
       return res.json({
         id: result.insertedId,
-        ...savedFile,
+        userId: user._id,
+        name,
+        type,
+        isPublic: isPublic || false,
+        parentId: parentId || '0',
       });
     } catch (error) {
       console.log(error);
