@@ -13,7 +13,7 @@ class RedisClient {
       this.isConnected = true;
     });
     this.promisifiedClientDel = promisify(this.client.DEL).bind(this.client);
-    this.promisifiedClientSet = promisify(this.client.SET).bind(this.client);
+    this.promisifiedClientSet = promisify(this.client.SETEX).bind(this.client);
     this.promisifiedClientGet = promisify(this.client.GET).bind(this.client);
     this.promisifiedClientEx = promisify(this.client.expire).bind(this.client);
   }
@@ -23,17 +23,17 @@ class RedisClient {
   }
 
   async get(value) {
-    const result = await this.promisifiedClientGet(value);
-    return result ? JSON.parse(result) : null;
+    return this.promisifiedClientGet(value);
   }
 
   async set(key, value, expireTime) {
-    await this.promisifiedClientSet(key, JSON.stringify(value), 'EX', expireTime);
+    return this.promisifiedClientSet(key, expireTime, value);
   }
 
   async del(key) {
-    await this.promisifiedClientDel(key);
+    return this.promisifiedClientDel(key);
   }
 }
 const redisClient = new RedisClient();
 export default redisClient;
+
