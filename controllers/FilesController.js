@@ -79,9 +79,9 @@ class FilesController {
       return res.json({
         id: result.insertedId,
         ...savedFile,
-        localPath: filePath,
       });
     } catch (error) {
+      console.log(error);
       res.statusCode = 500;
       return res.json({ error: 'An error occured' });
     }
