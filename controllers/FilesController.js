@@ -2,6 +2,7 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { promises } from 'fs';
 import { ObjectID } from 'mongodb';
+import {File} from '../utils/file";
 import dbClient from '../utils/db';
 
 const { mkdir, writeFile } = promises;
@@ -9,16 +10,16 @@ const { mkdir, writeFile } = promises;
 class FilesController {
   static
   async postUpload(req, res) {
-    let file = {};
     const acceptedTypes = ['file', 'folder', 'image'];
     const user = req.currentUser;
     const {
       name, type, data, parentId, isPublic,
     } = req.body;
-
-    if (!name || !type || !acceptedTypes.includes(type)) {
+    const file = new File(name, type, data, parentId, isPublic,);
+    const errors = file.validate();
+    if (errors) {
       res.statusCode = 400;
-      return res.json({ error: `Missing ${name ? 'type' : 'name'}` });
+      return res.json({ error: errors });
     }
     if (!data && type !== 'folder') {
       res.statusCode = 400;
