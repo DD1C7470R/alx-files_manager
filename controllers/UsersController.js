@@ -34,7 +34,7 @@ class UsersController {
         password: hashedpassword,
       });
 
-      res.statusCode = 200;
+      res.statusCode = 201;
       return res.json({
         id: savedUser.insertedId,
         email,
