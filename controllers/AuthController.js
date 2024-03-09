@@ -35,8 +35,8 @@ class AuthController {
       const hashedpassword = hashPassword(password);
 
       if (hashedpassword !== user[0].password) {
-        res.statusCode = 400;
-        return res.json({ error: 'password is incorrect' });
+        res.statusCode = 401;
+        return res.json({ error: 'Unauthorized' });
       }
 
       const token = uuidv4();
