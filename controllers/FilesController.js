@@ -99,29 +99,14 @@ class FilesController {
         res.statusCode = 404;
         return res.json({ error: 'Not found' });
       }
-      // const row = [];
-      res.statusCode = 200;
-      // for (const obj of results[0]) {
-      //   row.push({
-      //     id: new ObjectID(obj._id),
-      //     userId: new ObjectID(obj.userId),
-      //     name: obj.name,
-      //     type: obj.type,
-      //     isPublic: obj.isPublic,
-      //     parentId: new ObjectID(obj.parentId) || 0,
-      //   });
-      //   const id = obj._id;
-      //   delete obj.localPath;
-      //   delete obj._id;
-      //   row.push({ id, ...obj });
-      // }
+
       const modifyResult = results.map((file) => ({
         ...file,
         id: file._id,
         _id: undefined,
       }));
 
-      return res.json(modifyResult);
+      return res.status(200).json(modifyResult);
     } catch (error) {
       res.statusCode = 400;
       return res.json({ error: 'An error occured.' });
@@ -142,31 +127,16 @@ class FilesController {
       const fileCollections = dbClient.db.collection('files');
 
       if (!parentId === '0') {
-        const parent = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
-        if (!parent.length || parent[0].type !== 'folder') {
-          return res.status(200).json([]);
-        }
+        // const parent = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
+        // if (!parent.length || parent[0].type !== 'folder') {
+        //   return res.status(200).json([]);
+        // }
         query.parentId = new ObjectID(parentId);
       }
 
       const results = await fileCollections.find(query)
         .skip(page * MAX_PAGE_SIZE).limit(MAX_PAGE_SIZE).toArray();
 
-      // const filteredResults = [];
-      // for (const obj of results) {
-      // filteredResults.push({
-      //   id: new ObjectID(obj._id),
-      //   userId: new ObjectID(obj.userId),
-      //   name: obj.name,
-      //   type: obj.type,
-      //   isPublic: obj.isPublic,
-      //   parentId: obj.parentId === '0' ? 0 : new ObjectID(obj.parentId),
-      // });
-      //   const id = obj._id;
-      //   delete obj.localPath;
-      //   delete obj._id;
-      //   fileCollections.push({ id, ...obj });
-      // }
       const modifyResult = results.map((file) => ({
         ...file,
         id: file._id,
