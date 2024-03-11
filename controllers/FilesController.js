@@ -37,12 +37,10 @@ class FilesController {
           sfile = await fileCollections.find({ parentId: new ObjectID(parentId) }).toArray();
         }
         if (!sfile.length) {
-          res.statusCode = 400;
-          return res.json({ error: 'Parent not found' });
+          return res.status(400).json({ error: 'Parent not found' });
         }
         if (sfile && sfile[0].type !== 'folder') {
-          res.statusCode = 400;
-          return res.json({ error: 'Parent is not a folder' });
+          return res.status(400).json({ error: 'Parent is not a folder' });
         }
         if (sfile.length) {
           file.parentId = sfile.parentId;
@@ -53,7 +51,7 @@ class FilesController {
         name,
         type,
         isPublic: file.isPublic,
-        parentId: parentId === '0' ? '0' : new ObjectID(file.parentId),
+        parentId: file.parentId === '0' ? '0' : new ObjectID(file.parentId),
       };
       if (type === 'folder') {
         const result = await fileCollections.insertOne({ ...savedFile });
@@ -72,7 +70,7 @@ class FilesController {
       const filePath = path.join(folderPath, localPath);
       if (data) {
         await mkdir(filePath, { recursive: true });
-        const fileData = Buffer.from(data, 'base64').toString();
+        const fileData = Buffer.from(data, 'base64');
         await writeFile(filePath, fileData);
       }
       const result = await fileCollections.insertOne({ ...savedFile, localPath: filePath });
