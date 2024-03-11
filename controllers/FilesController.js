@@ -144,6 +144,7 @@ class FilesController {
         ...file,
         id: file._id,
         _id: undefined,
+        localPath: undefined,
       }));
       return res.status(200).json(modifyResult);
     } catch (error) {
