@@ -122,10 +122,13 @@ class FilesController {
   static
   async getIndex(req, res) {
     const user = req.currentUser;
-    const { parentId, page } = req.query;
+    let { parentId, page } = req.query;
     const query = { userId: new ObjectID(user._id) };
 
     try {
+      if (parentId === '0' || !parentId) parentId = 0;
+      page = Number.isNaN(page) ? 0 : Number(page);
+
       const MAX_PAGE_SIZE = 20;
       const fileCollections = dbClient.db.collection('files');
 
