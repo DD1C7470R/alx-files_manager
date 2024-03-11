@@ -104,7 +104,7 @@ class FilesController {
         ...file,
         id: file._id,
         _id: undefined,
-        parentId: file.parentId === '0' ? Number(file.parentId) : file.obj,
+        parentId: file.parentId === '0' ? Number(file.parentId) : file.parentId,
       }));
 
       return res.status(200).json(modifyResult);
@@ -142,7 +142,7 @@ class FilesController {
         ...file,
         id: file._id,
         _id: undefined,
-        parentId: file.parentId === '0' ? Number(file.parentId) : file.obj,
+        parentId: file.parentId === '0' ? Number(file.parentId) : file.parentId,
       }));
       return res.status(200).json(modifyResult);
     } catch (error) {
