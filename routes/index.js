@@ -20,7 +20,7 @@ indexRouter.get('/users/me', verifyUser, UsersController.getMe);
 indexRouter.get('/connect', AuthController.getConnect);
 indexRouter.get('/disconnect', AuthController.getDisconnect);
 
-indexRouter.get('/files/?', verifyUser, FilesController.getIndex);
+indexRouter.get('/files?', verifyUser, FilesController.getIndex);
 indexRouter.post('/files', verifyUser, FilesController.postUpload);
 indexRouter.get('/files/:id', verifyUser, FilesController.getShow);
 indexRouter.put('/files/:id/publish', verifyUser, FilesController.putPublish);
