@@ -94,7 +94,7 @@ class FilesController {
     try {
       const fileCollections = dbClient.db.collection('files');
       const results = await fileCollections.find({
-        _id: new ObjectID(id), userId: user._id,
+        _id: new ObjectID(id), userId: new ObjectID(user._id),
       }).toArray();
       if (!results.length) {
         res.statusCode = 404;
@@ -109,7 +109,7 @@ class FilesController {
           name: obj.name,
           type: obj.type,
           isPublic: obj.isPublic,
-          parentId: obj.parentId,
+          parentId: obj.parentId || 0,
         });
       }
       return res.json(row);
@@ -128,7 +128,7 @@ class FilesController {
       const nPages = Math.floor(nfiles / 20);
 
       const fileCollections = dbClient.db.collection('files');
-      const results = await fileCollections.find({ parentId }).toArray();
+      const results = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
       let row = results;
       let startIndex = 0;
       let endIndex = 19;
@@ -148,7 +148,7 @@ class FilesController {
           name: obj.name,
           type: obj.type,
           isPublic: obj.isPublic,
-          parentId: obj.parentId,
+          parentId: obj.parentId || 0,
         });
       }
       res.statusCode = 200;
