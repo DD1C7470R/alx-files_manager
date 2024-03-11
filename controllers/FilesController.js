@@ -13,7 +13,12 @@ class FilesController {
     const {
       name, type, data, parentId, isPublic,
     } = req.body;
-    if (!name || !type) {
+
+    file = {
+      name, type, data, parentId, isPublic,
+    };
+    const FILE_TYPES = ['file', 'folder', 'image'];
+    if (!name || !type || !FILE_TYPES.includes(type)) {
       res.statusCode = 400;
       return res.json({ error: `Missing ${name ? 'type' : 'name'}` });
     }
@@ -24,7 +29,7 @@ class FilesController {
     try {
       const fileCollections = dbClient.db.collection('files');
       if (parentId) {
-        file = await fileCollections.find({ parentId }).toArray();
+        const sfile = await fileCollections.find({ parentId }).toArray();
         if (!file.length) {
           res.statusCode = 400;
           return res.json({ error: 'Parent not found' });
@@ -33,14 +38,16 @@ class FilesController {
           res.statusCode = 400;
           return res.json({ error: 'Parent is not a folder' });
         }
+        if (sfile.length) {
+          file.parentId = sfile.parentId;
+        }
       }
       const savedFile = {
-        userId: user._id,
+        userId: new ObjectID(user._id),
         name,
         type,
-        isPublic: isPublic || false,
-        parentId: parentId || '0',
-        ...file,
+        isPublic: file.isPublic,
+        parentId: new ObjectID(file.parentId),
       };
       if (type === 'folder') {
         const result = await fileCollections.insertOne({ ...savedFile });
@@ -50,8 +57,8 @@ class FilesController {
           userId: user._id,
           name,
           type,
-          isPublic: isPublic || false,
-          parentId: '0',
+          isPublic: file.isPublic,
+          parentId: file.parentId,
         });
       }
       let folderPath = process.env.FOLDER_PATH;
@@ -69,9 +76,33 @@ class FilesController {
       res.statusCode = 201;
       return res.json({
         id: result.insertedId,
-        ...savedFile,
-        localPath: filePath,
+        userId: user._id,
+        name,
+        type,
+        isPublic: file.isPublic,
+        parentId: file.parentId,
       });
+    } catch (error) {
+      res.statusCode = 500;
+      return res.json({ error: 'An error occured.' });
+    }
+  }
+
+  static
+  async getShow(req, res) {
+    const { id } = req.params;
+    const user = req.currentUser;
+    try {
+      const fileCollections = dbClient.db.collection('files');
+      const results = await fileCollections.find({
+        _id: new ObjectID(id), userId: user._id,
+      }).toArray();
+      if (!results.length) {
+        res.statusCode = 404;
+        return res.json({ error: 'Not found' });
+      }
+      res.statusCode = 200;
+      return res.json(results[0]);
     } catch (error) {
       res.statusCode = 500;
       return res.json({ error: 'An error occured.' });
