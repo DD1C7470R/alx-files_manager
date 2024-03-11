@@ -126,7 +126,7 @@ class FilesController {
     try {
       const MAX_PAGE_SIZE = 20;
       const fileCollections = dbClient.db.collection('files');
-      const results = await fileCollections.find({ _id: new ObjectID(parentId) })
+      const results = await fileCollections.find({ parentId: new ObjectID(parentId) })
         .skip(page * MAX_PAGE_SIZE).limit(MAX_PAGE_SIZE).toArray();
 
       // const filteredResults = [];
