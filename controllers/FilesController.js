@@ -104,12 +104,12 @@ class FilesController {
       res.statusCode = 200;
       for (const obj of results[0]) {
         row.push({
-          id: obj._id,
-          userId: obj.userId,
+          id: new ObjectID(obj._id),
+          userId: new ObjectID(obj.userId),
           name: obj.name,
           type: obj.type,
           isPublic: obj.isPublic,
-          parentId: obj.parentId || 0,
+          parentId: new ObjectID(obj.parentId) || 0,
         });
       }
       return res.json(row);
@@ -143,12 +143,12 @@ class FilesController {
       const filteredResults = [];
       for (const obj of row) {
         filteredResults.push({
-          id: obj._id,
-          userId: obj.userId,
+          id: new ObjectID(obj._id),
+          userId: new ObjectID(obj.userId),
           name: obj.name,
           type: obj.type,
           isPublic: obj.isPublic,
-          parentId: obj.parentId || 0,
+          parentId: new ObjectID(obj.parentId) || 0,
         });
       }
       res.statusCode = 200;
