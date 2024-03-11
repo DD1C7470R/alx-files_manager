@@ -40,6 +40,7 @@ class FilesController {
           userId: new ObjectID(user._id),
           name,
           type: 'folder',
+          isPublic,
           parentId,
         });
         res.statusCode = 201;
@@ -48,6 +49,7 @@ class FilesController {
           userId: user._id,
           name,
           type: 'folder',
+          isPublic,
           parentId,
         });
       }
