@@ -41,7 +41,7 @@ class FilesController {
           name,
           type: 'folder',
           isPublic,
-          parentId,
+          parentId: parentId || 0,
         });
         res.statusCode = 201;
         return res.json({
@@ -50,7 +50,7 @@ class FilesController {
           name,
           type: 'folder',
           isPublic,
-          parentId,
+          parentId: parentId || 0,
         });
       }
       const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
@@ -76,7 +76,7 @@ class FilesController {
         name,
         type,
         isPublic,
-        parentId,
+        parentId: parentId || 0,
       });
     } catch (error) {
       console.log(error);
