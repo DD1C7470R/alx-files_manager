@@ -2,7 +2,7 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { promises } from 'fs';
 import { ObjectID } from 'mongodb';
-import {File} from '../utils/file";
+import { File } from '../utils/file';
 import dbClient from '../utils/db';
 
 const { mkdir, writeFile } = promises;
@@ -10,44 +10,43 @@ const { mkdir, writeFile } = promises;
 class FilesController {
   static
   async postUpload(req, res) {
-    const acceptedTypes = ['file', 'folder', 'image'];
+    // const acceptedTypes = ['file', 'folder', 'image'];
     const user = req.currentUser;
     const {
       name, type, data, parentId, isPublic,
     } = req.body;
-    const file = new File(name, type, data, parentId, isPublic,);
+    const file = new File(user._id, name, type, parentId, isPublic, data);
+
     const errors = file.validate();
     if (errors) {
       res.statusCode = 400;
       return res.json({ error: errors });
     }
-    if (!data && type !== 'folder') {
-      res.statusCode = 400;
-      return res.json({ error: 'Missing data' });
-    }
 
     try {
       const fileCollections = dbClient.db.collection('files');
-
+      let searchedFile = [];
       if (parentId) {
-        file = await fileCollections.find({ parentId }).toArray();
+        searchedFile = await fileCollections.find({ parentId }).toArray();
         if (!file.length) {
           res.statusCode = 400;
           return res.json({ error: 'Parent not found' });
         }
-        if (file && file[0].type !== 'folder') {
+        if (searchedFile && searchedFile[0].type !== 'folder') {
           res.statusCode = 400;
           return res.json({ error: 'Parent is not a folder' });
         }
+      }
+      if (searchedFile.length) {
+        file.parentId = searchedFile[0].parentId;
       }
 
       const savedFile = {
         userId: new ObjectID(user._id),
         name,
         type,
-        isPublic: isPublic || false,
-        parentId: new ObjectID(parentId) || '0',
-        ...file,
+        isPublic: file.isPublic,
+        parentId: new ObjectID(file.parentId),
       };
 
       if (type === 'folder') {
@@ -58,8 +57,8 @@ class FilesController {
           userId: user._id,
           name,
           type,
-          isPublic: isPublic || false,
-          parentId: parentId || '0',
+          isPublic: file.isPublic,
+          parentId: file.parentId,
         });
       }
 
@@ -84,11 +83,10 @@ class FilesController {
         userId: user._id,
         name,
         type,
-        isPublic: isPublic || false,
-        parentId: parentId || '0',
+        isPublic: file.isPublic,
+        parentId: file.parentId,
       });
     } catch (error) {
-      console.log(error);
       res.statusCode = 500;
       return res.json({ error: 'An error occured' });
     }

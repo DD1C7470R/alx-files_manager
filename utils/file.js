@@ -17,12 +17,13 @@ export class File {
     if (!this.name) {
       return 'Missing name';
     }
-    if (!this.data && this.type !== 'folder') {
-      return 'Missing data';
-    }
     if (!this.type || !VALID_FILE_TYPES.includes(this.type)) {
       return 'Missing type';
     }
+    if (!this.data && this.type !== 'folder') {
+      return 'Missing data';
+    }
+
     return null;
   }
 }
