@@ -124,24 +124,13 @@ class FilesController {
     const { parentId, page } = req.query;
 
     try {
-      const nfiles = await dbClient.nbFiles();
-      const nPages = Math.floor(nfiles / 20);
-
+      const MAX_PAGE_SIZE = 20;
       const fileCollections = dbClient.db.collection('files');
-      const results = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
-      let row = results;
-      let startIndex = 0;
-      let endIndex = 19;
-      if (results.length > 20) {
-        if (page && (page <= 1 && page < nPages)) {
-          startIndex = (page - 1) * 20;
-          endIndex = startIndex + 19;
-        }
-        row = results.slice(startIndex, endIndex + 1);
-      }
+      const results = await fileCollections.find({ _id: new ObjectID(parentId) })
+        .skip(page * MAX_PAGE_SIZE).limit(MAX_PAGE_SIZE).toArray();
 
       const filteredResults = [];
-      for (const obj of row) {
+      for (const obj of results) {
         filteredResults.push({
           id: new ObjectID(obj._id),
           userId: new ObjectID(obj.userId),
