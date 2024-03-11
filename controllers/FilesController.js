@@ -89,7 +89,7 @@ class FilesController {
   async getShow(req, res) {
     const { id } = req.params;
     const user = req.currentUser;
-    const row = [];
+    // const row = [];
 
     try {
       const fileCollections = dbClient.db.collection('files');
@@ -102,17 +102,17 @@ class FilesController {
       }
 
       res.statusCode = 200;
-      for (const obj of results[0]) {
-        row.push({
-          id: new ObjectID(obj._id),
-          userId: new ObjectID(obj.userId),
-          name: obj.name,
-          type: obj.type,
-          isPublic: obj.isPublic,
-          parentId: new ObjectID(obj.parentId) || 0,
-        });
-      }
-      return res.json(row);
+      // for (const obj of results[0]) {
+      //   row.push({
+      //     id: new ObjectID(obj._id),
+      //     userId: new ObjectID(obj.userId),
+      //     name: obj.name,
+      //     type: obj.type,
+      //     isPublic: obj.isPublic,
+      //     parentId: new ObjectID(obj.parentId) || 0,
+      //   });
+      // }
+      return res.json(results[0]);
     } catch (error) {
       res.statusCode = 400;
       return res.json({ error: 'An error occured.' });
@@ -129,19 +129,19 @@ class FilesController {
       const results = await fileCollections.find({ _id: new ObjectID(parentId) })
         .skip(page * MAX_PAGE_SIZE).limit(MAX_PAGE_SIZE).toArray();
 
-      const filteredResults = [];
-      for (const obj of results) {
-        filteredResults.push({
-          id: new ObjectID(obj._id),
-          userId: new ObjectID(obj.userId),
-          name: obj.name,
-          type: obj.type,
-          isPublic: obj.isPublic,
-          parentId: new ObjectID(obj.parentId) || 0,
-        });
-      }
+      // const filteredResults = [];
+      // for (const obj of results) {
+      //   filteredResults.push({
+      //     id: new ObjectID(obj._id),
+      //     userId: new ObjectID(obj.userId),
+      //     name: obj.name,
+      //     type: obj.type,
+      //     isPublic: obj.isPublic,
+      //     parentId: new ObjectID(obj.parentId) || 0,
+      //   });
+      // }
       res.statusCode = 200;
-      res.json(filteredResults);
+      res.json(results);
     } catch (error) {
       res.statusCode = 400;
       res.json({ error: 'An error occured.' });
