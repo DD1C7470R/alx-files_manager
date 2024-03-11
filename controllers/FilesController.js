@@ -110,8 +110,10 @@ class FilesController {
       //     isPublic: obj.isPublic,
       //     parentId: new ObjectID(obj.parentId) || 0,
       //   });
+        const id = obj._id;
         delete obj.localPath;
-        row.push({ ...obj });
+        delete obj._id;
+        row.push({ id, ...obj });
       }
       return res.json(results[0]);
     } catch (error) {
@@ -154,8 +156,10 @@ class FilesController {
         //   isPublic: obj.isPublic,
         //   parentId: obj.parentId === '0' ? 0 : new ObjectID(obj.parentId),
         // });
+        const id = obj._id;
         delete obj.localPath;
-        fileCollections.push({ ...obj });
+        delete obj._id;
+        fileCollections.push({ id, ...obj });
       }
       return res.status(200).json(filteredResults);
     } catch (error) {
