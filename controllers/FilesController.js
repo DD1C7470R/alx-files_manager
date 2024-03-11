@@ -41,7 +41,7 @@ class FilesController {
           name,
           type: 'folder',
           isPublic,
-          parentId: parentId || 0,
+          parentId: parentId ? new ObjectID(parentId) : 0,
         });
         res.statusCode = 201;
         return res.json({
