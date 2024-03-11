@@ -123,32 +123,37 @@ class FilesController {
   async getIndex(req, res) {
     const user = req.currentUser;
     const { parentId, page } = req.query;
+    const query = { userId: new ObjectID(user._id) };
 
     try {
       const MAX_PAGE_SIZE = 20;
       const fileCollections = dbClient.db.collection('files');
-      const results = await fileCollections.find({
-        userId: new ObjectID(user._id),
-        parentId: new ObjectID(parentId),
-      })
+
+      if (!parentId === '0') {
+        const parent = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
+        if (!parent.length || parent[0].type !== 'folder') {
+          return res.status(200).json([]);
+        }
+        query.parentId = new ObjectID(parentId);
+      }
+      const results = await fileCollections.find(query)
         .skip(page * MAX_PAGE_SIZE).limit(MAX_PAGE_SIZE).toArray();
 
-      // const filteredResults = [];
-      // for (const obj of results) {
-      //   filteredResults.push({
-      //     id: new ObjectID(obj._id),
-      //     userId: new ObjectID(obj.userId),
-      //     name: obj.name,
-      //     type: obj.type,
-      //     isPublic: obj.isPublic,
-      //     parentId: new ObjectID(obj.parentId) || 0,
-      //   });
-      // }
-      res.statusCode = 200;
-      res.json(results);
+      const filteredResults = [];
+      for (const obj of results) {
+        filteredResults.push({
+          id: new ObjectID(obj._id),
+          userId: new ObjectID(obj.userId),
+          name: obj.name,
+          type: obj.type,
+          isPublic: obj.isPublic,
+          parentId: new ObjectID(obj.parentId) || 0,
+        });
+      }
+      return res.status(200).json(filteredResults);
     } catch (error) {
       res.statusCode = 400;
-      res.json({ error: 'An error occured.' });
+      return res.json({ error: 'An error occured.' });
     }
   }
 
