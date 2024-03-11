@@ -1,7 +1,7 @@
 import { ObjectID } from 'mongodb';
 import File from '../utils/file';
 import dbClient from '../utils/db';
-
+import fileQueue from '../worker';
 
 class FilesController {
   static
