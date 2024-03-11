@@ -100,18 +100,16 @@ class FilesController {
         res.statusCode = 404;
         return res.json({ error: 'Not found' });
       }
+
       res.statusCode = 200;
-      console.log(results[0]);
       for (const obj of results[0]) {
         row.push({
-
           id: obj._id,
           userId: obj.userId,
           name: obj.name,
           type: obj.type,
           isPublic: obj.isPublic,
           parentId: obj.parentId,
-
         });
       }
       return res.json(row);
@@ -142,8 +140,19 @@ class FilesController {
         row = results.slice(startIndex, endIndex + 1);
       }
 
+      const filteredResults = [];
+      for (const obj of row) {
+        filteredResults.push({
+          id: obj._id,
+          userId: obj.userId,
+          name: obj.name,
+          type: obj.type,
+          isPublic: obj.isPublic,
+          parentId: obj.parentId,
+        });
+      }
       res.statusCode = 200;
-      res.json(row);
+      res.json(filteredResults);
     } catch (error) {
       res.statusCode = 500;
       res.json({ error: 'An error occured.' });
