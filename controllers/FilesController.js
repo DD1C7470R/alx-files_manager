@@ -136,6 +136,7 @@ class FilesController {
         }
         query.parentId = new ObjectID(parentId);
       }
+
       const results = await fileCollections.find(query)
         .skip(page * MAX_PAGE_SIZE).limit(MAX_PAGE_SIZE).toArray();
 
@@ -147,11 +148,12 @@ class FilesController {
           name: obj.name,
           type: obj.type,
           isPublic: obj.isPublic,
-          parentId: new ObjectID(obj.parentId) || 0,
+          parentId: obj.parentId === '0' ? 0 : new ObjectID(obj.parentId),
         });
       }
       return res.status(200).json(filteredResults);
     } catch (error) {
+      console.log(error);
       res.statusCode = 400;
       return res.json({ error: 'An error occured.' });
     }
