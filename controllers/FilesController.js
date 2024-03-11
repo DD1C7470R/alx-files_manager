@@ -1,92 +1,31 @@
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-import { promises } from 'fs';
 import { ObjectID } from 'mongodb';
-import { File } from '../utils/file';
+import File from '../utils/file';
 import dbClient from '../utils/db';
-
-const { mkdir, writeFile } = promises;
+import fileQueue from '../worker';
 
 class FilesController {
   static
   async postUpload(req, res) {
-    // const acceptedTypes = ['file', 'folder', 'image'];
     const user = req.currentUser;
+    const currentUser = { ...user, id: user.id };
     const {
       name, type, data, parentId, isPublic,
     } = req.body;
-    const file = new File(user._id, name, type, parentId, isPublic, data);
-
-    const errors = file.validate();
-    if (errors) {
-      res.statusCode = 400;
-      return res.json({ error: errors });
-    }
 
     try {
-      const fileCollections = dbClient.db.collection('files');
-      let searchedFile = [];
-      if (parentId) {
-        searchedFile = await fileCollections.find({ parentId }).toArray();
-        if (!file.length) {
-          res.statusCode = 400;
-          return res.json({ error: 'Parent not found' });
-        }
-        if (searchedFile && searchedFile[0].type !== 'folder') {
-          res.statusCode = 400;
-          return res.json({ error: 'Parent is not a folder' });
-        }
-      }
-      if (searchedFile.length) {
-        file.parentId = searchedFile[0].parentId;
-      }
-
-      const savedFile = {
-        userId: new ObjectID(user._id),
-        name,
-        type,
-        isPublic: file.isPublic,
-        parentId: new ObjectID(file.parentId),
-      };
-
-      if (type === 'folder') {
-        const result = await fileCollections.insertOne({ ...savedFile });
-        res.statusCode = 201;
-        return res.json({
-          id: result.insertedId,
-          userId: user._id,
-          name,
-          type,
-          isPublic: file.isPublic,
-          parentId: file.parentId,
+      const file = new File(
+        currentUser.id, name, type, parentId, isPublic, data,
+      );
+      const savedFile = await file.save();
+      if (savedFile.type === 'image') {
+        fileQueue.add({
+          userId: currentUser.id,
+          fileId: savedFile.id,
         });
       }
-
-      let folderPath = process.env.FOLDER_PATH;
-      if (!folderPath) {
-        folderPath = '/tmp/files_manager';
-      }
-      const localPath = uuidv4();
-      const filePath = path.join(folderPath, localPath);
-
-      if (data) {
-        await mkdir(folderPath, { recursive: true });
-        const fileData = Buffer.from(data, 'base64').toString();
-        await writeFile(filePath, fileData);
-      }
-
-      const result = await fileCollections.insertOne({ ...savedFile, localPath: filePath });
-
-      res.statusCode = 201;
-      return res.json({
-        id: result.insertedId,
-        userId: user._id,
-        name,
-        type,
-        isPublic: file.isPublic,
-        parentId: file.parentId,
-      });
+      return res.status(201).json(savedFile);
     } catch (error) {
+      console.log(error);
       res.statusCode = 500;
       return res.json({ error: 'An error occured' });
     }
