@@ -100,14 +100,13 @@ class FilesController {
         return res.json({ error: 'Not found' });
       }
 
-      const modifyResult = results.map((file) => ({
-        ...file,
-        id: file._id,
-        _id: undefined,
-        parentId: file.parentId === '0' ? Number(file.parentId) : file.parentId,
-      }));
+      // const modifyResult = results.map((file) => ({
+      //   ...file,
+      //   id: file._id,
+      //   _id: undefined,
+      // }));
 
-      return res.status(200).json(modifyResult);
+      return res.status(200).json(results[0]);
     } catch (error) {
       res.statusCode = 400;
       return res.json({ error: 'An error occured.' });
@@ -142,7 +141,6 @@ class FilesController {
         ...file,
         id: file._id,
         _id: undefined,
-        parentId: file.parentId === '0' ? Number(file.parentId) : file.parentId,
       }));
       return res.status(200).json(modifyResult);
     } catch (error) {
