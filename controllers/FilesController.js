@@ -1,9 +1,10 @@
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { writeFile } from 'fs';
-import { promisify } from 'util';
+import { promises } from 'fs';
 import { ObjectID } from 'mongodb';
 import dbClient from '../utils/db';
+
+const { mkdir, writeFile } = promises;
 
 class FilesController {
   static
@@ -29,12 +30,17 @@ class FilesController {
     try {
       const fileCollections = dbClient.db.collection('files');
       if (parentId) {
-        const sfile = await fileCollections.find({ parentId }).toArray();
-        if (!file.length) {
+        let sfile = [];
+        if (parentId === '0') {
+          sfile = await fileCollections.find({ parentId }).toArray();
+        } else {
+          sfile = await fileCollections.find({ parentId: new ObjectID(parentId) }).toArray();
+        }
+        if (!sfile.length) {
           res.statusCode = 400;
           return res.json({ error: 'Parent not found' });
         }
-        if (file && file[0].type !== 'folder') {
+        if (sfile && sfile[0].type !== 'folder') {
           res.statusCode = 400;
           return res.json({ error: 'Parent is not a folder' });
         }
@@ -47,7 +53,7 @@ class FilesController {
         name,
         type,
         isPublic: file.isPublic,
-        parentId: new ObjectID(file.parentId),
+        parentId: parentId === '0' ? '0' : new ObjectID(file.parentId),
       };
       if (type === 'folder') {
         const result = await fileCollections.insertOne({ ...savedFile });
@@ -68,9 +74,9 @@ class FilesController {
       const localPath = uuidv4();
       const filePath = path.join(folderPath, localPath);
       if (data) {
+        mkdir(filePath, { recursive: true });
         const fileData = Buffer.from(data, 'base64').toString();
-        const fileWriter = promisify(writeFile);
-        await fileWriter(filePath, fileData);
+        await writeFile(filePath, fileData);
       }
       const result = await fileCollections.insertOne({ ...savedFile, localPath: filePath });
       res.statusCode = 201;
@@ -83,6 +89,7 @@ class FilesController {
         parentId: file.parentId,
       });
     } catch (error) {
+      console.log(error);
       res.statusCode = 500;
       return res.json({ error: 'An error occured.' });
     }
