@@ -9,15 +9,11 @@ const { mkdir, writeFile } = promises;
 class FilesController {
   static
   async postUpload(req, res) {
-    let file = {};
     const user = req.currentUser;
     const {
       name, type, data, parentId, isPublic,
     } = req.body;
 
-    file = {
-      name, type, data, parentId, isPublic,
-    };
     const FILE_TYPES = ['file', 'folder', 'image'];
     if (!name || !type || !FILE_TYPES.includes(type)) {
       res.statusCode = 400;
@@ -30,58 +26,55 @@ class FilesController {
     try {
       const fileCollections = dbClient.db.collection('files');
       if (parentId) {
-        let sfile = [];
-        if (parseInt(parentId, 10) === 0) {
-          sfile = await fileCollections.find({ parentId }).toArray();
-        } else {
-          sfile = await fileCollections.find({ parentId: new ObjectID(parentId) }).toArray();
-        }
+        const sfile = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
         if (!sfile.length) {
           return res.status(400).json({ error: 'Parent not found' });
         }
         if (sfile && sfile[0].type !== 'folder') {
           return res.status(400).json({ error: 'Parent is not a folder' });
         }
-        if (sfile.length) {
-          file.parentId = sfile.parentId;
-        }
       }
-      const savedFile = {
-        userId: new ObjectID(user._id),
-        name,
-        type,
-        isPublic: file.isPublic,
-        parentId: file.parentId === '0' ? '0' : new ObjectID(file.parentId),
-      };
+
       if (type === 'folder') {
-        const result = await fileCollections.insertOne({ ...savedFile });
+        const result = await fileCollections.insertOne({
+          userId: new ObjectID(user._id),
+          name,
+          type: 'folder',
+          parentId,
+        });
         res.statusCode = 201;
         return res.json({
           id: result.insertedId,
           userId: user._id,
           name,
-          type,
-          isPublic: file.isPublic,
-          parentId: file.parentId,
+          type: 'folder',
+          parentId,
         });
       }
       const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
       const localPath = uuidv4();
       const filePath = path.join(folderPath, localPath);
       if (data) {
-        await mkdir(filePath, { recursive: true });
+        await mkdir(folderPath, { recursive: true });
         const fileData = Buffer.from(data, 'base64');
         await writeFile(filePath, fileData);
       }
-      const result = await fileCollections.insertOne({ ...savedFile, localPath: filePath });
+      const result = await fileCollections.insertOne({
+        userId: new ObjectID(user._id),
+        name,
+        type,
+        isPublic,
+        parentId: parentId ? new ObjectID(parentId) : 0,
+        localPath: filePath,
+      });
       res.statusCode = 201;
       return res.json({
         id: result.insertedId,
         userId: user._id,
         name,
         type,
-        isPublic: file.isPublic,
-        parentId: file.parentId,
+        isPublic,
+        parentId,
       });
     } catch (error) {
       console.log(error);
