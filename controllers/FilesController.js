@@ -89,6 +89,8 @@ class FilesController {
   async getShow(req, res) {
     const { id } = req.params;
     const user = req.currentUser;
+    const row = [];
+
     try {
       const fileCollections = dbClient.db.collection('files');
       const results = await fileCollections.find({
@@ -99,7 +101,20 @@ class FilesController {
         return res.json({ error: 'Not found' });
       }
       res.statusCode = 200;
-      return res.json(results[0]);
+      console.log(results[0]);
+      for (const obj of results[0]) {
+        row.push({
+
+          id: obj._id,
+          userId: obj.userId,
+          name: obj.name,
+          type: obj.type,
+          isPublic: obj.isPublic,
+          parentId: obj.parentId,
+
+        });
+      }
+      return res.json(row);
     } catch (error) {
       res.statusCode = 500;
       return res.json({ error: 'An error occured.' });
