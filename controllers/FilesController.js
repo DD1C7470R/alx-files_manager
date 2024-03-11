@@ -126,7 +126,6 @@ class FilesController {
       const MAX_PAGE_SIZE = 20;
       const fileCollections = dbClient.db.collection('files');
 
-
       if (!parentId === 0) {
         if (!ObjectId.isValid(parentId)) {
           return res.status(200).json([]);
