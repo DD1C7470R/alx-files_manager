@@ -80,7 +80,7 @@ class FilesController {
       });
     } catch (error) {
       console.log(error);
-      res.statusCode = 500;
+      res.statusCode = 400;
       return res.json({ error: 'An error occurred.' });
     }
   }
