@@ -1,7 +1,7 @@
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { promises } from 'fs';
-import { ObjectID } from 'mongodb';
+import { ObjectID, ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 
 const { mkdir, writeFile } = promises;
@@ -127,6 +127,9 @@ class FilesController {
       const fileCollections = dbClient.db.collection('files');
 
       if (!parentId === 0) {
+        if (!ObjectId.isValid(parentId)) {
+          return res.status(200).json([]);
+        }
         const parent = await fileCollections.find({ parentId: new ObjectID(parentId) }).toArray();
         if (!parent.length || parent[0].type !== 'folder') {
           return res.status(200).json([]);
