@@ -121,12 +121,16 @@ class FilesController {
 
   static
   async getIndex(req, res) {
+    const user = req.currentUser;
     const { parentId, page } = req.query;
 
     try {
       const MAX_PAGE_SIZE = 20;
       const fileCollections = dbClient.db.collection('files');
-      const results = await fileCollections.find({ parentId: new ObjectID(parentId) })
+      const results = await fileCollections.find({
+        userId: new ObjectID(user._id),
+        parentId: new ObjectID(parentId),
+      })
         .skip(page * MAX_PAGE_SIZE).limit(MAX_PAGE_SIZE).toArray();
 
       // const filteredResults = [];
