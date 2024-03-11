@@ -114,7 +114,7 @@ class FilesController {
       }
       return res.json(row);
     } catch (error) {
-      res.statusCode = 500;
+      res.statusCode = 400;
       return res.json({ error: 'An error occured.' });
     }
   }
@@ -143,7 +143,7 @@ class FilesController {
       res.statusCode = 200;
       res.json(filteredResults);
     } catch (error) {
-      res.statusCode = 500;
+      res.statusCode = 400;
       res.json({ error: 'An error occured.' });
     }
   }
