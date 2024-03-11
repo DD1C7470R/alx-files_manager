@@ -31,7 +31,7 @@ class FilesController {
       const fileCollections = dbClient.db.collection('files');
       if (parentId) {
         let sfile = [];
-        if (parentId === '0') {
+        if (parseInt(parentId, 10) === 0) {
           sfile = await fileCollections.find({ parentId }).toArray();
         } else {
           sfile = await fileCollections.find({ parentId: new ObjectID(parentId) }).toArray();
@@ -67,14 +67,11 @@ class FilesController {
           parentId: file.parentId,
         });
       }
-      let folderPath = process.env.FOLDER_PATH;
-      if (!folderPath) {
-        folderPath = '/tmp/files_manager';
-      }
+      const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
       const localPath = uuidv4();
       const filePath = path.join(folderPath, localPath);
       if (data) {
-        mkdir(filePath, { recursive: true });
+        await mkdir(filePath, { recursive: true });
         const fileData = Buffer.from(data, 'base64').toString();
         await writeFile(filePath, fileData);
       }
@@ -91,7 +88,7 @@ class FilesController {
     } catch (error) {
       console.log(error);
       res.statusCode = 500;
-      return res.json({ error: 'An error occured.' });
+      return res.json({ error: 'An error occurred.' });
     }
   }
 
