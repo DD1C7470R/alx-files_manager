@@ -214,7 +214,7 @@ class FilesController {
   async getFile(req, res) {
     const { id } = req.params;
     const token = req.headers['x-token'];
-    const { size } = req.query;
+    // const { size } = req.query;
 
     try {
       const userId = await redisClient.get(`auth_${token}`);
@@ -228,6 +228,7 @@ class FilesController {
 
       if (
         !result[0].isPublic
+        && ['folder', 'file'].includes(result[0].type)
         && (!userId || userId !== result[0].userId)
       ) {
         return res.status(404).json({ error: 'Not found' });
@@ -237,10 +238,10 @@ class FilesController {
         return res.status(400).json({ error: "A folder doesn't have content" });
       }
 
-      let filePath = result[0].localPath;
-      if (!Number.isNaN(size) && [500, 250, 100].includes(Number(size))) {
-        filePath += `_${size}`;
-      }
+      const filePath = result[0].localPath;
+      // if (!Number.isNaN(size) && [500, 250, 100].includes(Number(size))) {
+      //   filePath += `_${size}`;
+      // }
 
       if (!existsSync(filePath)) {
         return res.status(404).json({ error: 'Not found' });
@@ -280,6 +281,5 @@ class FilesController {
 //     done();
 //   });
 // }
-// && ['folder', 'file'].includes(result[0].type)
 
 export default FilesController;
