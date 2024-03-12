@@ -228,8 +228,7 @@ class FilesController {
 
       if (
         !result[0].isPublic
-        && ['folder', 'file'].includes(result[0].type)
-        && (!userId || userId !== result[0].userId)
+        && (!userId || String(userId) !== String(result[0].userId))
       ) {
         return res.status(404).json({ error: 'Not found' });
       }
@@ -239,9 +238,6 @@ class FilesController {
       }
 
       const filePath = result[0].localPath;
-      // if (!Number.isNaN(size) && [500, 250, 100].includes(Number(size))) {
-      //   filePath += `_${size}`;
-      // }
 
       if (!existsSync(filePath)) {
         return res.status(404).json({ error: 'Not found' });
