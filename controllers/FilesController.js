@@ -161,7 +161,12 @@ class FilesController {
         res.statusCode = 404;
         return res.json({ error: 'Not found' });
       }
-      const row = result[0];
+      const row = result.map((file) => ({
+        ...file,
+        id: file._id,
+        _id: undefined,
+        localPath: undefined,
+      }))[0];
       row.isPublic = true;
       res.statusCode = 200;
       return res.json(row);
