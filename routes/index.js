@@ -25,5 +25,6 @@ indexRouter.post('/files', verifyUser, FilesController.postUpload);
 indexRouter.get('/files/:id', verifyUser, FilesController.getShow);
 indexRouter.put('/files/:id/publish', verifyUser, FilesController.putPublish);
 indexRouter.put('/files/:id/unpublish', verifyUser, FilesController.putUntPublish);
+indexRouter.put('/files/:id/data', verifyUser, FilesController.getFile);
 
 export default indexRouter;

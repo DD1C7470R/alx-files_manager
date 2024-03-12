@@ -1,7 +1,11 @@
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { promises } from 'fs';
+import { existsSync, promises } from 'fs';
 import { ObjectID } from 'mongodb';
+// import Queue from 'bull';
+import { readFile } from 'fs/promises';
+import mime from 'mime-types';
+
 import dbClient from '../utils/db';
 
 const { mkdir, writeFile } = promises;
@@ -53,6 +57,11 @@ class FilesController {
           parentId: parentId || 0,
         });
       }
+
+      // if (type === 'image') {
+
+      // }
+
       const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
       const localPath = uuidv4();
       const filePath = path.join(folderPath, localPath);
@@ -162,13 +171,10 @@ class FilesController {
         return res.json({ error: 'Not found' });
       }
       const row = result[0];
-      // .map((file) => ({
-      //   ...file,
-      //   id: file._id,
-      //   _id: undefined,
-      //   localPath: undefined,
-      // }))[0];
       row.isPublic = true;
+      await fileCollection.updateOne({
+        _id: new ObjectID(id), userId: user._id,
+      }, { $set: { isPublic: true } });
       res.statusCode = 200;
       return res.json(row);
     } catch (error) {
@@ -194,12 +200,81 @@ class FilesController {
 
       const row = result[0];
       row.isPublic = false;
-      res.statusCode = 200;
-      return res.json(row);
+      await fileCollection.updateOne({
+        _id: new ObjectID(id), userId: user._id,
+      }, { $set: { isPublic: false } });
+      return res.status(200).json(row);
     } catch (error) {
       res.statusCode = 500;
       return res.json({ error: 'An error occured.' });
     }
   }
+
+  static
+  async getFile(req, res) {
+    const { id } = req.params;
+    const user = req.currentUser;
+
+    try {
+      const fileCollection = dbClient.db.collection('files');
+      const result = await fileCollection.find({
+        _id: new ObjectID(id),
+        userId: new ObjectID(user._id),
+      }).toArray();
+      if (!result.length) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+
+      if (
+        !result[0].isPublic
+        && ['folder', 'file'].includes(result[0].type)
+      ) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+
+      if (result[0].type === 'folder') {
+        return res.status(400).json({ error: "A folder doesn't have content" });
+      }
+
+      if (!existsSync(result[0].localPath)) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+      const fileContent = await readFile(result[0].localPath, 'utf-8');
+      if (!fileContent.length) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+      const mimeType = mime.lookup(result[0].name);
+      res.set('Content-Type', mimeType);
+      return res.status(400).end(fileContent);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ error: 'An error occured.' });
+    }
+  }
 }
+// const THUMBNAIL_SIZES = [500, 250, 100];
+// function queHandler() {
+//   const fileQueue = new Queue('image-thumbnail-worker', {
+//     redis: {
+//       host: 'localhost',
+//       port: 6379,
+//     },
+//   });
+
+//   fileQueue.process(async (job, done) => {
+//     const { userId, fileId } = job.data;
+//     if (!fileId) { done(new Error('Missing fileId')); }
+//     if (!userId) { done(new Error('Missing userId')); }
+
+//     const filesCollection = dbClient.db.collection('files');
+//     const file = await filesCollection.findUserFileById({ userId, _id: fileId });
+//     if (!file) { done(new Error('File not found')); }
+
+//     THUMBNAIL_SIZES.forEach(async (size) => {
+//       await createAndSaveThumbnail(file.localPath, size);
+//     });
+//     done();
+//   });
+// }
+
 export default FilesController;
