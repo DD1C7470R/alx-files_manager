@@ -2,9 +2,9 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { existsSync, promises } from 'fs';
 import { ObjectID } from 'mongodb';
-// import Queue from 'bull';
 import mime from 'mime-types';
 
+import fileQueue from '../utils/queHandler';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
@@ -47,6 +47,7 @@ class FilesController {
           isPublic,
           parentId: parentId ? new ObjectID(parentId) : 0,
         });
+
         res.statusCode = 201;
         return res.json({
           id: result.insertedId,
@@ -57,10 +58,6 @@ class FilesController {
           parentId: parentId || 0,
         });
       }
-
-      // if (type === 'image') {
-
-      // }
 
       const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
       const localPath = uuidv4();
@@ -78,6 +75,14 @@ class FilesController {
         parentId: parentId ? new ObjectID(parentId) : 0,
         localPath: filePath,
       });
+
+      if (type === 'image') {
+        fileQueue.add({
+          userId: user._id,
+          fileId: result.insertedId,
+        });
+      }
+
       res.statusCode = 201;
       return res.json({
         id: result.insertedId,
@@ -253,29 +258,5 @@ class FilesController {
     }
   }
 }
-// const THUMBNAIL_SIZES = [500, 250, 100];
-// function queHandler() {
-//   const fileQueue = new Queue('image-thumbnail-worker', {
-//     redis: {
-//       host: 'localhost',
-//       port: 6379,
-//     },
-//   });
-
-//   fileQueue.process(async (job, done) => {
-//     const { userId, fileId } = job.data;
-//     if (!fileId) { done(new Error('Missing fileId')); }
-//     if (!userId) { done(new Error('Missing userId')); }
-
-//     const filesCollection = dbClient.db.collection('files');
-//     const file = await filesCollection.findUserFileById({ userId, _id: fileId });
-//     if (!file) { done(new Error('File not found')); }
-
-//     THUMBNAIL_SIZES.forEach(async (size) => {
-//       await createAndSaveThumbnail(file.localPath, size);
-//     });
-//     done();
-//   });
-// }
 
 export default FilesController;
