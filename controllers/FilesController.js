@@ -214,6 +214,7 @@ class FilesController {
   async getFile(req, res) {
     const { id } = req.params;
     const token = req.headers['x-token'];
+    const { size } = req.query;
 
     try {
       const userId = await redisClient.get(`auth_${token}`);
@@ -236,10 +237,15 @@ class FilesController {
         return res.status(400).json({ error: "A folder doesn't have content" });
       }
 
-      if (!existsSync(result[0].localPath)) {
+      let filePath = result[0].localPath;
+      if (!Number.isNaN(size) && [500, 250, 100].includes(Number(size))) {
+        filePath += `_${size}`;
+      }
+
+      if (!existsSync(filePath)) {
         return res.status(404).json({ error: 'Not found' });
       }
-      const fileContent = await readFile(result[0].localPath);
+      const fileContent = await readFile(filePath);
 
       const mimeType = mime.lookup(result[0].name);
       res.set('Content-Type', mimeType);
