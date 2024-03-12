@@ -161,12 +161,13 @@ class FilesController {
         res.statusCode = 404;
         return res.json({ error: 'Not found' });
       }
-      const row = result.map((file) => ({
-        ...file,
-        id: file._id,
-        _id: undefined,
-        localPath: undefined,
-      }))[0];
+      const row = result[0];
+      // .map((file) => ({
+      //   ...file,
+      //   id: file._id,
+      //   _id: undefined,
+      //   localPath: undefined,
+      // }))[0];
       row.isPublic = true;
       res.statusCode = 200;
       return res.json(row);
@@ -184,7 +185,7 @@ class FilesController {
     try {
       const fileCollection = dbClient.db.collection('files');
       const result = await fileCollection.find({
-        _id: new ObjectID(id), userId: user.id,
+        _id: new ObjectID(id), userId: user._id,
       }).toArray();
       if (!result.length) {
         res.statusCode = 404;
