@@ -117,7 +117,7 @@ class FilesController {
   async getIndex(req, res) {
     const user = req.currentUser;
     let { parentId, page } = req.query;
-    const query = { userId: new ObjectID(user._id) };
+    const query = { userId: new ObjectID(user._id), parentId: 0 };
 
     try {
       if (parentId === '0' || !parentId) parentId = 0;
@@ -134,12 +134,10 @@ class FilesController {
         if (!parent.length || parent[0].type !== 'folder') {
           return res.status(200).json([]);
         }
-        parentId = new ObjectID(parentId);
+        query.parentId = new ObjectID(parentId);
       }
 
-      const results = await fileCollections.find({
-        userId: query.userId, parentId,
-      })
+      const results = await fileCollections.find(query)
         .skip(page * MAX_PAGE_SIZE).limit(MAX_PAGE_SIZE).toArray();
 
       const modifyResult = results.map((file) => ({
