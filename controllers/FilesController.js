@@ -6,6 +6,7 @@ import { ObjectID } from 'mongodb';
 import mime from 'mime-types';
 
 import dbClient from '../utils/db';
+import redisClient from '../utils/redis';
 
 const { mkdir, writeFile, readFile } = promises;
 
@@ -212,9 +213,10 @@ class FilesController {
   static
   async getFile(req, res) {
     const { id } = req.params;
-    const user = req.currentUser;
+    const token = req.headers['x-token'];
 
     try {
+      const userId = await redisClient.get(`auth_${token}`);
       const fileCollection = dbClient.db.collection('files');
       const result = await fileCollection.find({
         _id: new ObjectID(id),
@@ -226,7 +228,7 @@ class FilesController {
       if (
         !result[0].isPublic
         && ['folder', 'file'].includes(result[0].type)
-        && user._id !== result[0].userId
+        && userId !== result[0].userId
       ) {
         return res.status(404).json({ error: 'Not found' });
       }
@@ -245,7 +247,7 @@ class FilesController {
       return res.status(200).send(fileContent);
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ error: 'An error occured.' });
+      return res.status(400).json({ error: 'Not found' });
     }
   }
 }
