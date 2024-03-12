@@ -1,7 +1,7 @@
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { promises } from 'fs';
-import { ObjectID, ObjectId } from 'mongodb';
+import { ObjectID } from 'mongodb';
 import dbClient from '../utils/db';
 
 const { mkdir, writeFile } = promises;
@@ -111,7 +111,7 @@ class FilesController {
   async getIndex(req, res) {
     const user = req.currentUser;
     let { parentId, page } = req.query;
-    let query = { userId: new ObjectID(user._id), parentId: 0, type: 'folder' };
+    const query = { userId: new ObjectID(user._id) };
 
     try {
       if (parentId === '0' || !parentId) parentId = 0;
@@ -120,20 +120,20 @@ class FilesController {
       const MAX_PAGE_SIZE = 20;
       const fileCollections = dbClient.db.collection('files');
 
-      if (!parentId === 0) {
-        if (!ObjectId.isValid(parentId)) {
-          return res.status(200).json([]);
-        }
-        const parent = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
-        if (!parent.length || parent[0].type !== 'folder') {
-          return res.status(200).json([]);
-        }
+      // if (!parentId === 0) {
+      //   if (!ObjectId.isValid(parentId)) {
+      //     return res.status(200).json([]);
+      //   }
+      //   const parent = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
+      //   if (!parent.length || parent[0].type !== 'folder') {
+      //     return res.status(200).json([]);
+      //   }
 
-        query = {
-          userId: query.userId,
-          parentId: new ObjectID(parentId),
-        };
-      }
+      //   query = {
+      //     userId: query.userId,
+      //     parentId: new ObjectID(parentId),
+      //   };
+      // }
 
       const results = await fileCollections.find(query)
         .skip(page * MAX_PAGE_SIZE).limit(MAX_PAGE_SIZE).toArray();
