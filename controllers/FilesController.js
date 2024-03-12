@@ -227,7 +227,6 @@ class FilesController {
 
       if (
         !result[0].isPublic
-        && ['folder', 'file'].includes(result[0].type)
         && userId !== result[0].userId
       ) {
         return res.status(404).json({ error: 'Not found' });
@@ -275,5 +274,6 @@ class FilesController {
 //     done();
 //   });
 // }
+// && ['folder', 'file'].includes(result[0].type)
 
 export default FilesController;
