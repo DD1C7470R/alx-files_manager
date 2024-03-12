@@ -225,12 +225,12 @@ class FilesController {
         return res.status(404).json({ error: 'Not found' });
       }
 
-      if (
-        !result[0].isPublic
-        && ['folder', 'file'].includes(result[0].type)
-      ) {
-        return res.status(404).json({ error: 'Not found' });
-      }
+      // if (
+      //   !result[0].isPublic
+      //   && ['folder', 'file'].includes(result[0].type)
+      // ) {
+      //   return res.status(404).json({ error: 'Not found' });
+      // }
 
       if (result[0].type === 'folder') {
         return res.status(400).json({ error: "A folder doesn't have content" });
@@ -239,8 +239,8 @@ class FilesController {
       if (!existsSync(result[0].localPath)) {
         return res.status(404).json({ error: 'Not found' });
       }
-      const fileContent = await readFile(result[0].localPath, 'utf-8');
-      if (!fileContent.length) {
+      const fileContent = await readFile(result[0].localPath);
+      if (!fileContent) {
         return res.status(404).json({ error: 'Not found' });
       }
       const mimeType = mime.lookup(result[0].name);
