@@ -3,12 +3,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { existsSync, promises } from 'fs';
 import { ObjectID } from 'mongodb';
 // import Queue from 'bull';
-import { readFile } from 'fs/promises';
 import mime from 'mime-types';
 
 import dbClient from '../utils/db';
 
-const { mkdir, writeFile } = promises;
+const { mkdir, writeFile, readFile } = promises;
 
 class FilesController {
   static
@@ -225,12 +224,12 @@ class FilesController {
         return res.status(404).json({ error: 'Not found' });
       }
 
-      // if (
-      //   !result[0].isPublic
-      //   && ['folder', 'file'].includes(result[0].type)
-      // ) {
-      //   return res.status(404).json({ error: 'Not found' });
-      // }
+      if (
+        !result[0].isPublic
+        && ['folder', 'file'].includes(result[0].type)
+      ) {
+        return res.status(404).json({ error: 'Not found' });
+      }
 
       if (result[0].type === 'folder') {
         return res.status(400).json({ error: "A folder doesn't have content" });
