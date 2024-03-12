@@ -120,20 +120,12 @@ class FilesController {
       const MAX_PAGE_SIZE = 20;
       const fileCollections = dbClient.db.collection('files');
 
-      // if (!parentId === 0) {
-      //   if (!ObjectId.isValid(parentId)) {
-      //     return res.status(200).json([]);
-      //   }
-      //   const parent = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
-      //   if (!parent.length || parent[0].type !== 'folder') {
-      //     return res.status(200).json([]);
-      //   }
-
-      //   query = {
-      //     userId: query.userId,
-      //     parentId: new ObjectID(parentId),
-      //   };
-      // }
+      if (!parentId === 0) {
+        const parent = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
+        if (!parent.length || parent[0].type !== 'folder') {
+          return res.status(200).json([]);
+        }
+      }
       query = {
         userId: query.userId,
         parentId: parentId === 0 ? 0 : new ObjectID(parentId),
