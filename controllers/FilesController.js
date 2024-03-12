@@ -128,7 +128,7 @@ class FilesController {
       }
       query = {
         userId: query.userId,
-        parentId: parentId === 0 ? 0 : new ObjectID(parentId),
+        parentId: parentId === 0 ? '0' : new ObjectID(parentId),
       };
       const results = await fileCollections.find(query)
         .skip(page * MAX_PAGE_SIZE).limit(MAX_PAGE_SIZE).toArray();
