@@ -218,7 +218,6 @@ class FilesController {
       const fileCollection = dbClient.db.collection('files');
       const result = await fileCollection.find({
         _id: new ObjectID(id),
-        userId: new ObjectID(user._id),
       }).toArray();
       if (!result.length) {
         return res.status(404).json({ error: 'Not found' });
@@ -227,6 +226,7 @@ class FilesController {
       if (
         !result[0].isPublic
         && ['folder', 'file'].includes(result[0].type)
+        && user._id !== result[0]
       ) {
         return res.status(404).json({ error: 'Not found' });
       }
@@ -239,9 +239,7 @@ class FilesController {
         return res.status(404).json({ error: 'Not found' });
       }
       const fileContent = await readFile(result[0].localPath);
-      if (!fileContent) {
-        return res.status(404).json({ error: 'Not found' });
-      }
+
       const mimeType = mime.lookup(result[0].name);
       res.set('Content-Type', mimeType);
       return res.status(200).send(fileContent);
