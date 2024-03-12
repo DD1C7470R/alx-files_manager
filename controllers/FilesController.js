@@ -111,7 +111,7 @@ class FilesController {
   async getIndex(req, res) {
     const user = req.currentUser;
     let { parentId, page } = req.query;
-    let query = { userId: new ObjectID(user._id), parentId: 0 };
+    let query = { userId: new ObjectID(user._id), parentId: 0, type: 'file' || 'image' };
 
     try {
       if (parentId === '0' || !parentId) parentId = 0;
@@ -124,17 +124,13 @@ class FilesController {
         if (!ObjectId.isValid(parentId)) {
           return res.status(200).json([]);
         }
-        let parent;
-        parent = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
+        const parent = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
         if (!parent.length || parent[0].type !== 'folder') {
           return res.status(200).json([]);
         }
-        parent = await fileCollections.find({ parentId: new ObjectID(parentId) }).toArray();
-        if (!parent.length || parent[0].type !== 'folder') {
-          return res.status(200).json([]);
-        }
+
         query = {
-          ...query,
+          userId: query.userId,
           parentId: new ObjectID(parentId),
         };
       }
