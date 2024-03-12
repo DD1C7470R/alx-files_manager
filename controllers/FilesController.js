@@ -155,7 +155,7 @@ class FilesController {
     try {
       const fileCollection = dbClient.db.collection('files');
       const result = await fileCollection.find({
-        _id: new ObjectID(id), userId: user.id,
+        _id: new ObjectID(id), userId: user._id,
       }).toArray();
       if (!result.length) {
         res.statusCode = 404;
