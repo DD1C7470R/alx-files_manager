@@ -245,7 +245,7 @@ class FilesController {
       }
       const mimeType = mime.lookup(result[0].name);
       res.set('Content-Type', mimeType);
-      return res.status(400).end(fileContent);
+      return res.status(400).send(fileContent);
     } catch (error) {
       console.log(error);
       return res.status(500).json({ error: 'An error occured.' });
