@@ -124,7 +124,12 @@ class FilesController {
         if (!ObjectId.isValid(parentId)) {
           return res.status(200).json([]);
         }
-        const parent = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
+        let parent;
+        parent = await fileCollections.find({ _id: new ObjectID(parentId) }).toArray();
+        if (!parent.length || parent[0].type !== 'folder') {
+          return res.status(200).json([]);
+        }
+        parent = await fileCollections.find({ parentId: new ObjectID(parentId) }).toArray();
         if (!parent.length || parent[0].type !== 'folder') {
           return res.status(200).json([]);
         }
